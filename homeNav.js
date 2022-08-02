@@ -4,8 +4,9 @@ import { StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 import Home from "./home"
-import report from './report';
+import Report from './Report';
 import share from './share'
+import History from './History';
 //import Schedule from "./schedule"
 
 
@@ -41,32 +42,51 @@ function homeNav() {
             name="Schedule" 
             component={Home} 
             options={{
+              unmountOnBlur: true,
               tabBarColor:'royalblue',
               tabBarIcon: ({ color }) => (
                 <MaterialIcons name='format-list-bulleted' size={24} color={color}></MaterialIcons>
               ),
             }}
+            listeners={({navigation}) => ({blur: () => navigation.setParams({screen: undefined})})}
           />
           <Stack.Screen 
             name="Report" 
-            component={report} 
+            component={Report} 
             options={{
+              unmountOnBlur: true,
               tabBarColor:'limegreen',
               tabBarIcon: ({ color }) => (
                 <MaterialIcons name='accessibility' size={24} color={color}></MaterialIcons>
               ),
             }}
+            listeners={({navigation}) => ({blur: () => navigation.setParams({screen: undefined})})}
           />
           <Stack.Screen 
             name="Share" 
             component={share} 
             options={{
+              unmountOnBlur: true,
               tabBarLabel: 'Share',
               tabBarColor:'orange',
               tabBarIcon: ({ color }) => (
                 <MaterialIcons name='people' size={24} color={color}></MaterialIcons>
               ),
             }}
+            listeners={({navigation}) => ({blur: () => navigation.setParams({screen: undefined})})}
+          />
+          <Stack.Screen 
+            name="History" 
+            component={History} 
+            options={{
+              unmountOnBlur: true,
+              tabBarLabel: 'History',
+              tabBarColor:'orange',
+              tabBarIcon: ({ color }) => (
+                <MaterialIcons name='insert-chart' size={24} color={color}></MaterialIcons>
+              ),
+            }}
+            listeners={({navigation}) => ({blur: () => navigation.setParams({screen: undefined})})}
           />
           {/*<Stack.Screen 
             name="Settings" 

@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
-import { StyleSheet, Button, Image, Pressable, Text, View, SafeAreaView, Platform, StatusBar, TouchableOpacity, Navigator, ScrollView, Modal } from 'react-native';
+import React, { useState, useLayoutEffect} from 'react';
+import { StyleSheet, Button, Image, Pressable, Text, View, SafeAreaView, SectionList, TouchableOpacity, Navigator, ScrollView, Modal } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { Searchbar } from 'react-native-paper';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Home from './home';
-//import { getAuth } from "firebase/auth";
-//import {contacts} from './Home';
-//import { auth } from './Firebase';
+
+import { collection, addDoc, query, where, getDocs, deleteDoc, doc, setDoc, getDoc, updateDoc} from "firebase/firestore"; 
+import { auth, db } from './Firebase';
+
+import { thisUser, athletes } from './login';
 
 
 function Share({navigation}) {
@@ -20,6 +23,9 @@ function Share({navigation}) {
         { name: 'bowser', id: '8', acwr: 1, newM:false},
     ]);
     //const [people, setPeople] = useState(contacts);
+
+    const [searchQuery, setSearchQuery] = React.useState('');
+    const onChangeSearch = query => setSearchQuery(query);
 
     const [modalVisible, setModalVisible] = useState(false);
     const [mAlert, showmAlert] = useState(false);
@@ -68,6 +74,36 @@ function Share({navigation}) {
         }
     }
 
+    //var athletes = []
+    const getTeam = async () => {
+        const docRef = doc(db, "teams", thisUser.team);
+        const docSnap = await getDoc(docRef);
+        //athletes = docSnap.data().athletes
+        //console.log("Document data:", docSnap.data().athletes)
+        /*for (let i = 0; i < docSnap.data().athletes.length; i++) {
+            const athlete = {
+                id: i,
+                name: docSnap.data().athletes[i].name,
+                acwr: docSnap.data().athletes[i].acwr,
+            }
+            athletes.push(athlete)
+        }
+        console.log(athletes)*/
+        //JSON.parse(athletes)
+        //console.log(athletes)
+        //var [peo, setPeo] = useState(athletes)
+        //console.log(people)
+    }
+    
+
+    useLayoutEffect(() => {
+        //getTeam()
+        if (onChangeSearch){
+
+        }
+    })
+    console.log('main',athletes)
+
     const getData = async () => {
         try {
             const jsonValue = await AsyncStorage.getItem('@storage_Key')
@@ -104,8 +140,24 @@ function Share({navigation}) {
 
     return (
         <SafeAreaView style={styles.container}>
+            <View style = {{flexDirection: 'row'}}>
+                <View style = {{flex:7}}>
+                    <Searchbar
+                        placeholder= {'search '+ thisUser.team}
+                        onChangeText={onChangeSearch}
+                        value={searchQuery}
+                        elevation={0}
+                    />
+                </View>
+                <View style = {{flex:2, justifyContent:'center'}}>
+                    <Button
+                        title='Filter'
+                    >
+                    </Button>
+                </View>
+            </View>
             <ScrollView>
-                {people.map(item => (
+                {athletes.map(item => (
                     <View key={item.key} style={[{ justifyContent: "space-evenly" }, { flexDirection: "row" }]}>
                         <TouchableOpacity style={styles.item} onPress={()=>
                              //HomeScreen(),
@@ -116,7 +168,7 @@ function Share({navigation}) {
                              }>
                             <View key={item.key} style={[ { flexDirection: "row" }]}>
                                 {/*{alert(item.newM, item.avatar)}*/}
-                                <Image style={[styles.av,{borderWidth:0}]} source={{uri: 'https://placeimg.com/140/140/any'}}></Image>
+                                {/*<Image style={[styles.av,{borderWidth:0}]} source={{uri: 'https://placeimg.com/140/140/any'}}></Image>*/}
                                
                                 <Text style={[styles.text,{ flex:3}]}>
                                     {item.name}

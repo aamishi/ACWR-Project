@@ -1,11 +1,15 @@
-import React, { useLayoutEffect, useState, useRef } from 'react';
-import { StyleSheet, Pressable, Text, View, SafeAreaView, TextInput, TouchableOpacity, Modal,Animated, PanResponder} from 'react-native';
+import React, { useLayoutEffect, useState, useRef, Component} from 'react';
+import { StyleSheet, Pressable, Text, View, SafeAreaView, TextInput, TouchableOpacity, Modal,Animated, PanResponder, Button} from 'react-native';
 import { MaterialIcons, AntDesign } from '@expo/vector-icons';
+import { getAuth, signOut } from "firebase/auth";
+import RNPickerSelect from 'react-native-picker-select';
 //import { getAuth, signOut } from "firebase/auth";
 //import { auth } from './Firebase';
+import { thisUser } from './login';
 
 
-function settings({navigation}) {
+const settings = ({navigation}) => {
+    
     const [properties, setProperty] = useState([
         { name: 'Name', id: '1'},
         { name: 'Email', id: '2'},
@@ -14,8 +18,8 @@ function settings({navigation}) {
 
     //const [username, onChangeUsername] = React.useState(auth.currentUser.displayName);
     //const [email, onChangeEmail] = React.useState(auth.currentUser.email);
-    const [username, onChangeUsername] = React.useState('joe');
-    const [email, onChangeEmail] = React.useState('auth.currentUser.email');
+    const [username, onChangeUsername] = React.useState(thisUser.name);
+    const [email, onChangeEmail] = React.useState(thisUser.email);
     const [text, onChangeText] = React.useState("123-456-789");
     
     
@@ -24,20 +28,22 @@ function settings({navigation}) {
     const icon = 'star-border'
     const col = 'red'
 
-    useLayoutEffect(() => {
+    /*useLayoutEffect(() => {
        navigation.setOptions({
            headerRight:()=> (
                <AntDesign name = "logout" size = {24}
                 color = 'black'/>
            )
        })
-    })
-    const signOut = () =>{
-        auth.signOut().then(() => {
-            navigation.replace('Login')
-        // Sign-out successful.
-        }).catch((error) => {
-        // An error happened.
+    })*/
+
+    const signOut = () => {
+        //navigation.navigate('Login')
+        getAuth().signOut().then(function() {
+            navigation.navigate('Login')
+          // Sign-out successful.
+        }, function(error) {
+          // An error happened.
         });
     }
 
@@ -49,41 +55,10 @@ function settings({navigation}) {
         }
     }
 
-    const pan = useRef(new Animated.ValueXY()).current;
-    const panResponder = useRef(
-        PanResponder.create({
-        onMoveShouldSetPanResponder: () => true,
-        onPanResponderMove: Animated.event([
-            null,
-            { dx: pan.x, dy: pan.y }
-        ]),
-        onPanResponderRelease: () => {
-            Animated.spring(pan, { toValue: { x: 0, y: 0 } }).start();
-        }
-        })
-    ).current;
-
-
     return (
         <SafeAreaView style={styles.container}>
             <View style={{flex:2}}>
                     <View style={styles.item}>
-                            <Animated.View
-                                style={{
-                                transform: [{ translateX: pan.x }, { translateY: pan.y }]
-                                }}
-                                {...panResponder.panHandlers}
-                            >
-                            <TouchableOpacity
-                                    style={[{alignSelf: 'stretch'}]}
-                            //onPress={signOut}
-                            onPress={() => {
-                                setModalVisible(true)     
-                            }}
-                            >
-                                    <MaterialIcons name='circle' size={150} color="slateblue"></MaterialIcons>
-                            </TouchableOpacity>
-                            </Animated.View>
                             <View>
                                 <TouchableOpacity
                                         style={[{alignSelf: 'stretch'}]}
@@ -135,16 +110,18 @@ function settings({navigation}) {
                 </View>
                 <View style={[{padding:15}]}>
                     <Text>
-                        Phone Number
+                        Team
                     </Text>
-                    <TextInput
-                        style={styles.input}
-                        onChangeText={onChangeText}
-                        value={text}
-                        clearButtonMode={true}
-                        keyboardType='numeric'
-                    />       
+                    <RNPickerSelect
+                        style={styles.picker}
+                        onValueChange={(value) => console.log(value)}
+                        items={[
+                            { label: 'Varisty Blues', value: 'football' },
+                            { label: 'Toronto Racers', value: 'baseball' },
+                        ]}
+                    />
                 </View>
+                <Button title = 'Sign Out' style = {styles.button} onPress = {signOut}/>
             </View>
             <Modal
                 animationType="slide"
@@ -189,6 +166,16 @@ const styles = StyleSheet.create({
       //alignItems: 'center',
       //justifyContent: 'center',
     },*/
+    picker:{
+        fontSize: 16,
+        paddingVertical: 12,
+        paddingHorizontal: 10,
+        borderWidth: 1,
+        borderColor: 'gray',
+        borderRadius: 4,
+        color: 'black',
+        paddingRight: 30, 
+    },
     centeredView: {
         flex: 1,
         justifyContent: "center",

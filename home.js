@@ -1,72 +1,141 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { StyleSheet, Button, Text, View, SafeAreaView, Platform, StatusBar, TouchableOpacity, Navigator, Animated, PanResponder, Dimensions } from 'react-native';
+import { StyleSheet, Button, Text, View, SafeAreaView, Platform, StatusBar, TouchableOpacity, FlatList, RefreshControl, Dimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-//import { PanGestureHandler, State } from 'react-native-gesture-handler';
-//import getNodes from './getNodes';
-//import useLayout from './useLayout';
-//import { vh, vw } from 'react-native-css-vh-vw';
-//import Move from "./screens/Move"
-//import { auth, db } from './Firebase';
-//import { doc, getDoc} from "firebase/firestore";
+import {
+    LineChart,
+    BarChart,
+    PieChart,
+    ProgressChart,
+    ContributionGraph,
+    StackedBarChart
+} from "react-native-chart-kit";
+import { Table, TableWrapper, Row, Rows, Col, Cols, Cell } from 'react-native-table-component';
+
+//import { data, thisUser } from './login';
+import {thisUser} from './login';
 
 const contacts = []
-const data = {acute:[], chronic :[]};
+
+//const data = {daily: [], acute:[], chronic :[]};
 
 
-function Home() {
+
+function Home({navigation, route}) {
 
     const { width, height } = Dimensions.get('window');
 
-    const getData = async () => {
-        try {
-            const jsonValue = await AsyncStorage.getItem('@storage_Key')
-            jsonValue != null ? JSON.parse(jsonValue) : null;
-            console.log(JSON.parse(jsonValue).acute)
-            data.acute = JSON.parse(jsonValue).acute
-            data.chronic = JSON.parse(jsonValue).chronic
-            return jsonValue
-        } catch(e) {
-          // error reading value
+    const goals = 
+            [
+                {key: 'Improve tendon strength/elasticity'},
+                {key: 'Relaxed upper body and arm swing'},
+                {key: 'Increase stride length'},
+            ]   
+    
+    
+    const tableHead = ['Day/Workout', 'Monday', 'Wednesday', 'Friday']
+    const tableData = [
+              ['Warm Up', 'Cleans', 'Snatch', 'Clean + Jerk'],
+              ['Superset 1', 'Squat\nRDL', 'Bench\nPullup', 'Deadlift\nNordic Curls'],
+              ['Superset 2', 'Calf Bounds', 'Rows\nLateral Raises', 'Back Extension\nReverse Nordic'],
+              ['Cool Down', 'Tibialis Raises', 'Rotator Cuff', 'Calf Raises']
+            ]
+
+    /*const pastMonths = () => {
+        const week = data.daily.pop()
+        console.log(week.length)
+        const values = []
+        for (let i = 0; i < week.length; i++) {
+            values.push(week[i].value)
         }
-    }
-
-    const updateData = async (value) => {
-        try {
-            const jsonValue = JSON.stringify(value)
-            await AsyncStorage.setItem('@storage_Key', jsonValue)
-            console.log('done')
-          } catch (e) {
-            // saving error
-          }
-    }
-
-    const addData = () => {
-        try {
-            data.chronic.push(100)
-            console.log(data.acute)
-            console.log(data.chronic)
-          } catch (e) {
-            // saving error
-          }
-    }
+        return values
+    }*/
 
     return (
         <SafeAreaView style={[styles.container, {flexDirection: "column"}]}>
-            <View style={{ flex: 1, backgroundColor: "red" }}>
-                <Text style = {[styles.text]}>
-                    Current Health Status / Workload or past reports
-                </Text>
+            <View style={{ flex: 1, justifyContent:'center'}}>
+                {/*<Text style = {[styles.text, {color:'orange'}]}>
+                    Current Health Status / Workload or reports / goals
+                </Text>*/}
+                <View style={{ flexDirection:'row', justifyContent:'space-evenly'}}>
+                    <View>
+                        <TouchableOpacity
+                            style={[styles.roundButton1,{borderColor:'limegreen'}]}
+                        >
+                            <Text>
+                                {
+                                    //Math.round(data.acwr[data.acwr.length - 1] * 100) / 100
+                                    Math.round(global.data.acwr[global.data.acwr.length - 1] * 100) / 100
+                                }
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View>
+                        <Text>Goals</Text>
+                        <FlatList
+                            data={goals}
+                            renderItem={({item}) => <Text>{'\u2B24' + ' '}{item.key}</Text>}
+                        />
+                    </View>
+                </View>
             </View>
-            <View style={{ flex: 2, backgroundColor: "darkorange" }}>
-                <Text style = {[styles.text]}>
-                    Workout
-                </Text>
+            <View style={{ 
+                flex: 3, 
+                padding: 10,
+                justifyContent:'center'
+                //backgroundColor: "darkorange"
+                }}>
+                    <Table borderStyle={{borderWidth: 2, borderColor: '#c8e1ff'}}>
+                        <Row data={tableHead} style={styles.head} textStyle={styles.text}/>
+                        <Rows data={tableData} textStyle={styles.text}/>
+                    </Table>
             </View>
-            <View style={{ flex: 3, backgroundColor: "green" }}>
-                <Text style = {[styles.text]}>
-                    Calendar
-                </Text>
+            <View style={{ flex: 3, justifyContent: 'center', alignSelf:'center'}}>
+                    <LineChart
+                        data={{
+                        labels: ["January", "February", "March", "April", "May", "June"],
+                        datasets: [
+                            {
+                            /*data: [
+                                Math.random() * 100,
+                                Math.random() * 100,
+                                Math.random() * 100,
+                                Math.random() * 100,
+                                Math.random() * 100,
+                                Math.random() * 100
+                            ]*/
+                            data: global.data.acwr.slice(0,6)
+                            //data: pastMonths()
+                            }
+                        ]
+                        }}
+                        width={Dimensions.get("window").width - 10} // from react-native
+                        height={225}
+                        //yAxisLabel="$"
+                        //yAxisSuffix="k"
+                        yAxisInterval={1} // optional, defaults to 1
+                        chartConfig={{
+                        backgroundColor: "#e26a00",
+                        backgroundGradientFrom: "#fb8c00",
+                        backgroundGradientTo: "#ffa726",
+                        decimalPlaces: 2, // optional, defaults to 2dp
+                        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                        labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                        style: {
+                            borderRadius: 16
+                        },
+                        propsForDots: {
+                            r: "6",
+                            strokeWidth: "2",
+                            stroke: "#ffa726"
+                        }
+                        }}
+                        bezier
+                        style={{
+                        marginVertical: 8,
+                        borderRadius: 10
+                        }}
+                />   
             </View>
         </SafeAreaView>
     );
@@ -129,6 +198,23 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         paddingLeft: 10,
         paddingRight: 10
+    },
+    roundButton1: {
+        width: 60,
+        height: 60,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 10,
+        borderRadius: 100,
+        borderWidth: 5,
+        margin:10
+    },
+    head: {
+        height: 30,
+        backgroundColor: '#f1f8ff'
+     },
+    text: { 
+        margin: 5 
     }
 });
 
