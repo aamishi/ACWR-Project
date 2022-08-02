@@ -5,23 +5,39 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MaterialIcons } from '@expo/vector-icons';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { getAuth, signOut } from "firebase/auth";
 
 import Home from "./screens/home"
 import homeNav from './screens/homeNav';
 import login from './screens/login';
 import Register from './screens/RegisterScreen.js';
+import Settings from './screens/settings.js';
 
 const Stack = createNativeStackNavigator();
 
+//export default function App() {
+const App = ({navigation}) => {
 
-export default function App() {
-
+  const auth = getAuth();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
   const [items, setItems] = useState([
     {label: 'Apple', value: 'apple'},
     {label: 'Banana', value: 'banana'}
   ]);
+
+  /*const signOut = () => {
+    getAuth().signOut().then(function() {
+      // Sign-out successful.
+    }, function(error) {
+      // An error happened.
+    });
+  }*/
+  
+  const signOut = () => {
+    navigation.navigate('Register')
+  }
+  
 
 
   return (
@@ -34,13 +50,20 @@ export default function App() {
       <Stack.Screen 
           name="LiNK" 
           component={homeNav} 
-          options={{ 
+          //options={{ 
+          options={({ navigation }) => ({
+
             headerTitle: 'ACWR',
             headerStyle: {
               //backgroundColor: '#f4511e',
             },
             headerRight: () => (
-              <TouchableOpacity onPress={() => alert('This is a button!')}>
+              <TouchableOpacity onPress={() => 
+                //alert('This is a button!')
+                //navigation.navigate('Register')
+                navigation.navigate('Settings')
+                //signOut()
+              }>
                   <MaterialIcons name='settings' size={30} color="black">
                   </MaterialIcons>
               </TouchableOpacity>
@@ -60,7 +83,7 @@ export default function App() {
             />*/}
               </View>
             ),
-            }}
+            })}
           //options={{ headerShown: false }}
         />
         <Stack.Screen 
@@ -70,6 +93,10 @@ export default function App() {
         <Stack.Screen 
           name="Register" 
           component={Register} 
+        />
+        <Stack.Screen 
+          name="Settings" 
+          component={Settings} 
         />
     {/*<View style={styles.container}>
       <Home></Home>
@@ -88,3 +115,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
+
+export default App;
